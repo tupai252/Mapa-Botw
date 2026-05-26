@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - Hyrule Map</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="body-standalone-form">
+
+    <main class="form-center-container">
+        <div class="wireframe-card-box">
+            <button class="close-card-btn" onclick="window.location.href='index.html'" aria-label="Cerrar y volver al mapa">✖</button>
+            
+            <form id="register-form-element" class="interactive-form">
+                <div class="form-field-row">
+                    <label for="reg-user" class="screen-reader-only">Nombre de usuario</label>
+                    <input type="text" id="reg-user" class="wireframe-input" placeholder="Nombre de usuario" required>
+                </div>
+
+                <div class="form-field-row">
+                    <label for="reg-email" class="screen-reader-only">Correo</label>
+                    <input type="email" id="reg-email" class="wireframe-input" placeholder="Correo" required>
+                </div>
+
+                <div class="form-field-row">
+                    <label for="reg-pass" class="screen-reader-only">Contraseña</label>
+                    <input type="password" id="reg-pass" class="wireframe-input" placeholder="Contraseña" required>
+                </div>
+
+                <div class="form-navigation-link-zone">
+                    <a href="login.html" class="switch-form-link">Iniciar sesión</a>
+                </div>
+
+                <div class="form-action-button-zone">
+                    <button type="submit" class="wireframe-submit-btn">REGISTRARSE</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

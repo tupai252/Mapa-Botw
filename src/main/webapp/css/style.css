@@ -1,0 +1,619 @@
+:root {
+    --canvas-background: #8e7d62;
+    --app-dark-bg: #4a3c2d;
+    --header-sidebar-bg: #6b553e;
+    --wireframe-card-bg: #e3ded5;
+    --wireframe-input-bg: #ffffff;
+    --text-light: #fdfbf7;
+    --text-dark: #2c241b;
+    --text-muted: #73675a;
+    --header-height: 4.5rem;
+    --sidebar-width: 15rem;
+    
+    --cat-santuario: #3b82f6; 
+    --cat-tesoro: #eab308; 
+    --cat-mision: #22c55e; 
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    height: 100vh;
+    font-size: 100%;
+    overflow: hidden;
+}
+
+.screen-reader-only {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.hidden { 
+    display: none !important; 
+}
+
+.body-map { 
+    background-color: var(--app-dark-bg); 
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+.main-header {
+    height: var(--header-height);
+    background-color: var(--header-sidebar-bg);
+    border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.15);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.auth-buttons { 
+    display: flex; 
+    gap: 1rem; 
+}
+
+/* =========================================
+   ESTILO GLOBAL: Botones Blancos
+   ========================================= */
+button, 
+input[type="submit"], 
+input[type="button"], 
+.btn-nav, 
+.wireframe-submit-btn {
+    background-color: #ffffff; /* Fondo totalmente blanco */
+    color: var(--text-dark); /* Letra oscura para que se lea bien */
+    border: 1px solid #bdafa0; /* Un borde sutil para que destaquen sobre cualquier fondo */
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: auto;
+    
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* Efecto al pasar el ratón (Hover) */
+button:hover, 
+input[type="submit"]:hover, 
+input[type="button"]:hover, 
+.btn-nav:hover, 
+.wireframe-submit-btn:hover {
+    background-color: var(--wireframe-card-bg); /* Cambia al color pergamino oscuro al pasar el ratón */
+    transform: scale(1.02); /* Sigue haciendo el efecto chulo de crecer un poco */
+}
+
+/* Excepción: Botones dentro de formularios (Login/Registro/Añadir) */
+/* Se mantienen grandes ocupando todo el ancho */
+.wireframe-submit-btn,
+.interactive-form button {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.profile-container {
+    position: relative;
+}
+
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.username-display { 
+    font-size: 0.95rem; 
+}
+
+.avatar-circle {
+    width: 2.2rem;
+    height: 2.2rem;
+    background-color: var(--app-dark-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0.0625rem solid var(--text-light);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background-color: var(--wireframe-card-bg);
+    border: 0.0625rem solid #bdafa0;
+    border-radius: 0.25rem;
+    min-width: 11rem;
+    box-shadow: 0 0.5rem 1rem rgba(44, 36, 27, 0.3);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item-btn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.dropdown-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.dropdown-item-btn:not(:first-child) {
+    border-top: 0.0625rem solid rgba(189, 175, 160, 0.6);
+}
+
+.map-viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    background-color: var(--app-dark-bg);
+    display: block;
+}
+
+.map-canvas-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+#map-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    width: max-content;
+    height: max-content;
+    transform-origin: 0px 0px;
+    cursor: grab;
+}
+
+#map-asset {
+    display: block;
+    max-width: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
+}
+
+#markers-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.map-marker {
+    position: absolute;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.125rem solid var(--wireframe-card-bg);
+    border-radius: 50% 50% 50% 0;
+    transform-origin: 0% 100%;
+    transform: translateY(-100%) rotate(-45deg) scale(var(--marker-scale, 1));
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 20;
+    box-shadow: -0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5);
+    transition: transform 0.1s ease;
+}
+
+.map-marker.santuario { background-color: var(--cat-santuario); }
+.map-marker.tesoro { background-color: var(--cat-tesoro); }
+.map-marker.mision { background-color: var(--cat-mision); }
+
+.map-marker:hover {
+    transform: translateY(-100%) rotate(-45deg) scale(calc(var(--marker-scale, 1) * 1.2));
+    filter: brightness(1.2);
+}
+/* Clase para cuando el usuario tacha un marcador */
+.map-marker.tachado {
+    filter: grayscale(100%) opacity(0.5);
+    transform: translateY(-100%) rotate(-45deg) scale(calc(var(--marker-scale, 1) * 0.8));
+}
+.map-marker.tachado:hover {
+    filter: grayscale(100%) opacity(0.8);
+    transform: translateY(-100%) rotate(-45deg) scale(var(--marker-scale, 1));
+}
+
+#marker-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-card {
+    animation: modalSlideUp 0.2s ease-out;
+}
+
+.modal-form-title {
+    color: var(--text-dark);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(1.5rem); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100%;
+    background-color: rgba(107, 85, 62, 0.95);
+    border-right: 0.0625rem solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 1.2rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 5;
+}
+
+.sidebar.collapsed { 
+    transform: translateX(-100%); 
+}
+
+.sidebar.expanded { 
+    transform: translateX(0); 
+}
+
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: -2rem;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 3.5rem;
+    background-color: var(--wireframe-card-bg);
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.arrow-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.sidebar.expanded .arrow-icon { 
+    transform: rotate(180deg); 
+}
+
+.sidebar-inner-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.category-title {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 0.0625rem solid rgba(255,255,255,0.2);
+    padding-bottom: 0.25rem;
+}
+
+.body-standalone-form { 
+    background-color: var(--canvas-background); 
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+.form-center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+    padding: 2rem 1rem;
+}
+
+.wireframe-card-box {
+    background-color: var(--wireframe-card-bg);
+    padding: 3rem 2.5rem;
+    border-radius: 1.5rem;
+    width: 100%;
+    max-width: 24rem;
+    position: relative;
+    box-shadow: 0 0.5rem 1.5rem rgba(44, 36, 27, 0.4);
+}
+
+/* =========================================
+   Excepción: La "X" de cerrar ventanas
+   ========================================= */
+.close-card-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    background: transparent !important; /* Forzamos a que no tenga fondo blanco */
+    border: none !important;            /* Forzamos a que no tenga borde gris */
+    padding: 0 !important;              /* Le quitamos el padding para que no sea un rectángulo */
+    width: auto !important;             /* Evitamos que ocupe espacio extra */
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* Efecto hover SOLO para la X */
+.close-card-btn:hover {
+    background: transparent !important; /* Evitamos que coja el fondo pergamino */
+    color: var(--text-dark);            /* Hacemos que la X se ponga más oscura */
+    transform: scale(1.2) !important;   /* Solo crece la letra, sin cajas raras */
+}
+
+.interactive-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.wireframe-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--wireframe-input-bg);
+    border: 0.0625rem solid #bdafa0;
+    border-radius: 0.25rem;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-family: inherit;
+}
+
+select.wireframe-input {
+    cursor: pointer;
+}
+
+.wireframe-input:focus { 
+    outline: 0.125rem solid var(--header-sidebar-bg); 
+}
+
+.form-navigation-link-zone {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.switch-form-link {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    text-decoration: none;
+}
+
+.switch-form-link:hover { 
+    text-decoration: underline; 
+}
+
+.form-action-button-zone { 
+    margin-top: 0.5rem; 
+}
+
+.main-footer {
+    background-color: var(--header-sidebar-bg);
+    border-top: 0.0625rem solid rgba(255, 255, 255, 0.15);
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+    z-index: 10;
+    width: 100%;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.footer-link {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.footer-copy {
+    color: rgba(253, 251, 247, 0.5);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    letter-spacing: 0.03em;
+}
+/* =========================================
+   Excepción: Botón del menú lateral (Tamaño, posición y Hover)
+   ========================================= */
+.sidebar-toggle-btn {
+    padding: 0 !important;             /* Le quitamos el "engorde" global */
+    width: 2rem !important;            /* Respetamos su tamaño exacto matemático */
+    height: 3.5rem !important;
+    right: -2rem !important;           /* Lo empujamos exactamente fuera del menú */
+    border-radius: 0 0.5rem 0.5rem 0 !important; /* Esquinas planas por la izquierda, redondeadas por la derecha */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-left: none !important;      /* Quitamos el borde izquierdo para que se fusione perfectamente con el menú */
+}
+
+/* Efecto hover: Mantiene su centro y crece un poquito */
+.sidebar-toggle-btn:hover {
+    transform: translateY(-50%) scale(1.05) !important;
+}
+/* =========================================
+   FONDO DIFUMINADO Y LAYOUT PARA EL INDEX
+   ========================================= */
+
+/* 1. Hacemos que el body sea un contenedor flexible que ocupe el 100% de la pantalla */
+.body-index {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    margin: 0;
+}
+
+/* 2. Capa fantasma: FIJA a la pantalla de tu ordenador (Así nunca habrá cortes blancos) */
+.body-index::before {
+    content: "";
+    position: fixed !important; /* Fijo a la pantalla, no al contenido */
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    /* PÓN AQUÍ LA RUTA A TU IMAGEN DEL MAPA */
+    background-image: url('../img/mapa-hyrule.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    filter: blur(8px);
+    transform: scale(1.05); /* Evita márgenes blancos por el difuminado */
+    z-index: -1;
+    opacity: 0.6;
+}
+
+/* 3. Magia Flexbox: Obligamos al contenedor de la tarjeta a expandirse */
+.body-index > div:not(.main-footer) {
+    flex-grow: 1 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra la tarjeta exactamente en medio */
+    align-items: center;
+}
+
+/* 4. Obligamos matemáticamente al footer a irse abajo del todo */
+.body-index .main-footer {
+    margin-top: auto !important;
+    width: 100%;
+}
+
+@media (max-width: 48rem) {
+    :root {
+        --header-height: 3.75rem;
+        --sidebar-width: 100%;
+    }
+    .sidebar { 
+        top: auto;
+        bottom: 0;
+        height: auto;
+        max-height: 60vh;
+        border-top: 0.0625rem solid rgba(255, 255, 255, 0.15); 
+        border-right: none; 
+        border-radius: 1.5rem 1.5rem 0 0;
+        overflow: visible;
+    }
+    .sidebar.collapsed { 
+        transform: translateY(100%); 
+    }
+    .sidebar.expanded { 
+        transform: translateY(0); 
+    }
+    .sidebar-toggle-btn {
+        top: -2rem;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: 4rem;
+        height: 2rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+    .arrow-icon {
+        transform: rotate(-90deg);
+    }
+    .sidebar.expanded .arrow-icon { 
+        transform: rotate(90deg); 
+    }
+    .sidebar-inner-content {
+        max-height: calc(60vh - 3rem);
+        overflow-y: auto;
+        padding-bottom: 2rem;
+    }
+    .wireframe-card-box { 
+        padding: 2.5rem 1.5rem; 
+        max-width: 90%; 
+    }
+    .footer-content {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .sidebar-toggle-btn {
+        right: auto !important;
+        top: -2rem !important;
+        width: 4rem !important;
+        height: 2rem !important;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-left: 1px solid #bdafa0 !important; /* Le devolvemos el borde */
+        border-bottom: none !important;
+    }
+    .sidebar-toggle-btn:hover {
+        transform: translateX(-50%) scale(1.05) !important;
+    }
+
+}

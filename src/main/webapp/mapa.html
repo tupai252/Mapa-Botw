@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyrule Map - Plataforma Web</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body class="body-map">
+
+    <div class="app-container">
+        <header class="main-header">
+            <div class="header-content">
+                <div class="header-left"></div>
+                <nav class="user-navigation" aria-label="Control de usuario">
+                    <div class="auth-buttons" id="auth-zone">
+                        <button class="btn-nav" onclick="window.location.href='login.html'">INICIAR SESIÓN</button>
+                        <button class="btn-nav" onclick="window.location.href='register.html'">REGISTRARSE</button>
+                    </div>
+                    <div class="user-profile hidden" id="profile-zone">
+                        <div class="profile-trigger" id="profile-menu-trigger">
+                            <span class="username-display"></span>
+                            <div class="avatar-circle" aria-hidden="true">👤</div>
+                        </div>
+                        <div id="profile-dropdown" class="profile-dropdown hidden">
+                            <button type="button" id="btn-change-pass" class="dropdown-item-btn">Cambiar contraseña</button>
+                            <button type="button" id="btn-logout" class="dropdown-item-btn">Cerrar sesión</button>
+                            <button type="button" id="btn-delete-account" class="dropdown-item-btn">Borrar cuenta</button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <main class="map-viewport">
+            <div class="map-canvas-layer">
+                <div id="map-wrapper">
+                    <img src="img/mapa-hyrule.jpg" alt="Mapa interactivo de Hyrule" id="map-asset">
+                    <div id="markers-layer"></div>
+                </div>
+            </div>
+
+            <div id="marker-modal" class="hidden">
+                <div class="modal-card wireframe-card-box">
+                    <button type="button" class="close-card-btn" id="close-marker-modal">&times;</button>
+                    <h3 class="modal-form-title">NUEVO MARCADOR</h3>
+                    <form id="marker-form" class="interactive-form">
+                        <input type="text" id="marker-name-input" class="wireframe-input" placeholder="Nombre del lugar o secreto" required autocomplete="off">
+                        
+                        <select id="marker-category-input" class="wireframe-input" required>
+                            <option value="" disabled selected>Selecciona una categoría</option>
+                            <option value="santuario">Santuario</option>
+                            <option value="tesoro">Tesoro</option>
+                            <option value="mision">Misión</option>
+                        </select>
+
+                        <div class="form-action-button-zone">
+                            <button type="submit" class="wireframe-submit-btn">AÑADIR AL MAPA</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="password-modal" class="hidden" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 100;">
+                <div class="modal-card wireframe-card-box">
+                    <button type="button" class="close-card-btn" id="close-password-modal">&times;</button>
+                    <h3 class="modal-form-title">NUEVA CONTRASEÑA</h3>
+                    <form id="password-form" class="interactive-form">
+                        <input type="password" id="new-password-input" class="wireframe-input" placeholder="Introduce tu nueva contraseña" required>
+                        <div class="form-action-button-zone">
+                            <button type="submit" class="wireframe-submit-btn">ACTUALIZAR CLAVE</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <aside class="sidebar collapsed" id="sidebar-menu" aria-label="Filtros del mapa">
+                <button class="sidebar-toggle-btn" id="toggle-sidebar" aria-expanded="false" aria-controls="sidebar-menu">
+                    <span class="arrow-icon">➔</span>
+                </button>
+
+                <div class="sidebar-inner-content">
+                    <section class="sidebar-group">
+                        <h2 class="category-title" id="title-santuario">Santuarios 0/0</h2>
+                    </section>
+
+                    <section class="sidebar-group">
+                        <h2 class="category-title" id="title-tesoro">Tesoros 0/0</h2>
+                    </section>
+
+                    <section class="sidebar-group">
+                        <h2 class="category-title" id="title-mision">Misiones 0/0</h2>
+                    </section>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="main-footer">
+            <div class="footer-content">
+                <a href="privacidad.html" class="footer-link">Política de Privacidad</a>
+                <a href="cookies.html" class="footer-link">Política de Cookies</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/script.js?v=2"></script>
+</body>
+</html>
