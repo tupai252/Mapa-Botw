@@ -48,9 +48,14 @@ public class TacharMarcadorController extends HttpServlet {
             System.out.println("DEBUG TACHAR: JSON recibido = " + jsonFronend);
             System.out.println("DEBUG TACHAR: idMarcador=" + idMarcador + ", tachado=" + tachado + ", username=" + username);
 
-            if (username == null || username.isEmpty() || idMarcador == 0) {
+            if (idMarcador == 0) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\": \"Datos insuficientes o usuario no autenticado\"}");
+                response.getWriter().write("{\"error\": \"idMarcador es 0 o no llegó. JSON recibido: " + jsonFronend.replace("\"", "'") + "\"}");
+                return;
+            }
+            if (username == null || username.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"username es null o vacío. JSON recibido: " + jsonFronend.replace("\"", "'") + "\"}");
                 return;
             }
 
