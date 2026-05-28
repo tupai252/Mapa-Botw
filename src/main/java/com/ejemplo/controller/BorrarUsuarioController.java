@@ -1,15 +1,15 @@
 package controller;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.io.BufferedReader;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.ejemplo.model.ConexionBD;
+import com.ejemplo.model.BorrarUsuarioDAO;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @WebServlet("/BorrarUsuario")
 public class BorrarUsuarioController extends HttpServlet {
@@ -18,24 +18,27 @@ public class BorrarUsuarioController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        String username = request.getParameter("username");
-        boolean exito = false;
-
-        if (username != null && !username.trim().isEmpty()) {
-            String sql = "DELETE FROM usuarios WHERE username = ?";
-
-            try (Connection conn = ConexionBD.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                pstmt.setString(1, username);
-                int filasAfectadas = pstmt.executeUpdate();
-                if (filasAfectadas > 0) {
-                    exito = true;
-                }
-
-            } catch (SQLException e) {
-                System.err.println("Error al borrar el usuario: " + e.getMessage());
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
             }
+        }
+        
+        String username = null;
+        if (sb.length() > 0) {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(sb.toString(), JsonObject.class);
+            if (jsonObject != null && jsonObject.has("username")) {
+                username = jsonObject.get("username").getAsString();
+            }
+        }
+
+        boolean exito = false;
+        if (username != null) {
+            BorrarUsuarioDAO dao = new BorrarUsuarioDAO();
+            exito = dao.borrarUsuario(username);
         }
 
         response.setContentType("application/json");
