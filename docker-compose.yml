@@ -12,9 +12,9 @@ services:
     environment:
       MYSQLHOST: mysql.railway.internal
       MYSQLPORT: 3306
-      MYSQL_DATABASE: bd1
+      MYSQL_DATABASE: railway
       MYSQLUSER: root
-      MYSQLPASSWORD: root
+      MYSQLPASSWORD: cAjVCaTAdHSBfqWvlmYDOPhtYWzChwkg
     networks:
       - red_app
 
