@@ -8,7 +8,7 @@ import com.ejemplo.model.ConexionBD;
 public class TacharMarcadorDAO {
 
     // Método aislado para modificar (Update del CRUD) el estado de un marcador
-    public boolean alternarTachado(int idMarcador, String username, boolean nuevoEstado) {
+    public boolean alternarTachado(int id_marcador, String username, boolean nuevoEstado) {
         
         String sql;
         if (nuevoEstado) {
@@ -23,7 +23,7 @@ public class TacharMarcadorDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, username);
-            pstmt.setInt(2, idMarcador);
+            pstmt.setInt(2, id_marcador);
             
             pstmt.executeUpdate();
             return true;
