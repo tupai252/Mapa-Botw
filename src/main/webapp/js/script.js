@@ -126,8 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const updateData = {
                     idMarcador: parseInt(id),
-                    tachado: nuevoEstado,
-                    username: localStorage.getItem('user_session')
+                    tachado: nuevoEstado
                 };
 
                 fetch(`${API_BASE_URL}/TacharMarcadorController`, {
@@ -135,13 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updateData)
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            alert('Error al guardar: ' + data.error);
-                            return;
-                        }
-                        // Si el servidor confirmó el guardado, actualizamos visualmente
+                    .then(response => {
+                        if (!response.ok) throw new Error('Error al actualizar');
+                        // Si Java da el OK, le ponemos o quitamos la clase gris visualmente
                         if (nuevoEstado) {
                             markerElement.classList.add('tachado');
                             if (trackerCounts[category]) {
@@ -156,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     })
-                    .catch(error => alert('No se pudo conectar con el servidor.'));
+                    .catch(error => alert('No se pudo marcar como visto.'));
             } else {
                 // Si es un invitado sin iniciar sesión
                 alert('Inicia sesión para poder marcar los puntos que has visitado.');
@@ -216,12 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. READ (CRUD): CARGAR MARCADORES DE MYSQL
         // ==========================================
         // Petición GET asíncrona mediante promesa (fetch) al Servlet de Java
-        const activeUserSession = localStorage.getItem('user_session');
-        const leerUrl = activeUserSession
-            ? `${API_BASE_URL}/LeerMarcadoresController?username=${encodeURIComponent(activeUserSession)}`
-            : `${API_BASE_URL}/LeerMarcadoresController`;
-
-        fetch(leerUrl)
+        fetch(`${API_BASE_URL}/LeerMarcadoresController`)
             .then(response => {
                 if (!response.ok) throw new Error('Error al cargar marcadores');
                 return response.json(); // Transformamos la respuesta de texto plano a formato JSON

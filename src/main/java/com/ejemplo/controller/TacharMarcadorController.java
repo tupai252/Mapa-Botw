@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.TacharMarcadorDAO;
-import model.Marcador; // Importamos el modelo de actualización
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,9 +27,10 @@ public class TacharMarcadorController extends HttpServlet {
                 sb.append(line);
             }
         }
-        String jsonFronend = sb.toString(); 
+        String jsonFronend = sb.toString();
 
         try {
+            // 2. Extraemos el ID y el booleano
             int idMarcador = 0;
             java.util.regex.Matcher mId = java.util.regex.Pattern.compile("\"idMarcador\"\\s*:\\s*(\\d+)").matcher(jsonFronend);
             if (mId.find()) {
@@ -38,30 +38,16 @@ public class TacharMarcadorController extends HttpServlet {
             }
 
             boolean tachado = java.util.regex.Pattern.compile("\"tachado\"\\s*:\\s*true").matcher(jsonFronend).find();
-            
-            String username = null;
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"username\"\\s*:\\s*\"([^\"]*)\"").matcher(jsonFronend);
-            if (m.find()) {
-                username = m.group(1);
-            }
-
-            System.out.println("DEBUG TACHAR: JSON recibido = " + jsonFronend);
-            System.out.println("DEBUG TACHAR: idMarcador=" + idMarcador + ", tachado=" + tachado + ", username=" + username);
 
             if (idMarcador == 0) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\": \"idMarcador es 0 o no llegó. JSON recibido: " + jsonFronend.replace("\"", "'") + "\"}");
-                return;
-            }
-            if (username == null || username.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\": \"username es null o vacío. JSON recibido: " + jsonFronend.replace("\"", "'") + "\"}");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"ID de marcador inválido\"}");
                 return;
             }
 
-            // 3. Llamamos al DAO aislado de actualización
+            // 3. Llamamos al DAO
             TacharMarcadorDAO tacharDAO = new TacharMarcadorDAO();
-            boolean exito = tacharDAO.alternarTachado(idMarcador, username, tachado);
+            boolean exito = tacharDAO.alternarTachado(idMarcador, tachado);
 
             // 4. Respondemos
             if (exito) {
@@ -76,17 +62,5 @@ public class TacharMarcadorController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"Formato de datos incorrecto\"}");
         }
-    }
-
-    // Método auxiliar (chuleta)
-    private String extractJsonValueNumber(String json, String key) {
-        String searchKey = "\"" + key + "\":";
-        int startIndex = json.indexOf(searchKey);
-        if (startIndex == -1) return "0";
-        startIndex += searchKey.length();
-        int endComma = json.indexOf(",", startIndex);
-        int endBrace = json.indexOf("}", startIndex);
-        int endIndex = (endComma != -1 && endComma < endBrace) ? endComma : endBrace;
-        return json.substring(startIndex, endIndex).trim();
     }
 }

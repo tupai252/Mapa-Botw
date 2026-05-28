@@ -14,7 +14,7 @@ services:
       MYSQLPORT: 3306
       MYSQL_DATABASE: railway
       MYSQLUSER: root
-      MYSQLPASSWORD: cAjVCaTAdHSBfqWvlmYDOPhtYWzChwkg
+      MYSQLPASSWORD: amzCWmFmwEshtFLTdTSMrAQOxcrqjOFa
     networks:
       - red_app
 

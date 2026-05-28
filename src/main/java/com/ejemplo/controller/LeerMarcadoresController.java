@@ -22,12 +22,9 @@ public class LeerMarcadoresController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        // 1b. Extraemos el nombre de usuario de los parámetros (si existe)
-        String username = request.getParameter("username");
-
         // 2. Invocamos al modelo aislado para traernos los datos reales de MySQL
         LeerMarcadoresDAO leerDAO = new LeerMarcadoresDAO();
-        List<Marcador> marcadores = leerDAO.obtenerTodosLosMarcadores(username);
+        List<Marcador> marcadores = leerDAO.obtenerTodosLosMarcadores();
 
         // 3. PARSEO MANUAL A JSON (Regra estricta: Sin librerías externas)
         // Vamos a construir una cadena que simule la estructura de un array: [{}, {}, {}]
