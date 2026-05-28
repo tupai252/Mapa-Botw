@@ -135,9 +135,13 @@ const trackerNames = {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updateData)
                 })
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al actualizar');
-                    // Si Java da el OK, le ponemos o quitamos la clase gris visualmente
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error al guardar: ' + data.error);
+                        return;
+                    }
+                    // Si el servidor confirmó el guardado, actualizamos visualmente
                     if (nuevoEstado) {
                         markerElement.classList.add('tachado');
                         if (trackerCounts[category]) {
@@ -152,7 +156,7 @@ const trackerNames = {
                         }
                     }
                 })
-                .catch(error => alert('No se pudo marcar como visto.'));
+                .catch(error => alert('No se pudo conectar con el servidor.'));
             } else {
                 // Si es un invitado sin iniciar sesión
                 alert('Inicia sesión para poder marcar los puntos que has visitado.');
