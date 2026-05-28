@@ -1,8 +1,4 @@
-USE railway;
-
-DROP TABLE IF EXISTS usuario_marcador;
-DROP TABLE IF EXISTS marcadores;
-DROP TABLE IF EXISTS usuarios;
+USE bd1;
 
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
