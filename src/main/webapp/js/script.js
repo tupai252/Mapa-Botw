@@ -42,20 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const markerCategoryInput = document.getElementById('marker-category-input');
 
     // Objeto para llevar la cuenta de cuántos marcadores hay de cada tipo
-const trackerCounts = {
-    tesoro: { total: 0, marked: 0 },
-    mision: { total: 0, marked: 0 },
-    santuario: { total: 0, marked: 0 },
-    poi: { total: 0, marked: 0 }
-};
+    const trackerCounts = {
+        tesoro: { total: 0, marked: 0 },
+        mision: { total: 0, marked: 0 },
+        santuario: { total: 0, marked: 0 },
+        poi: { total: 0, marked: 0 }
+    };
 
-// Nombres legibles para mostrar en el menú lateral
-const trackerNames = {
-    tesoro: 'Tesoros',
-    mision: 'Misiones',
-    santuario: 'Santuarios',
-    poi: 'Puntos de Interés'
-};
+    // Nombres legibles para mostrar en el menú lateral
+    const trackerNames = {
+        tesoro: 'Tesoros',
+        mision: 'Misiones',
+        santuario: 'Santuarios',
+        poi: 'Puntos de Interés'
+    };
 
     // Función para actualizar los contadores en el menú lateral de HTML
     const updateTrackerUI = (category) => {
@@ -91,9 +91,9 @@ const trackerNames = {
 
         const handleMarkerAction = (event) => {
             event.preventDefault(); // Evitamos el menú nativo
-            
+
             const userRol = localStorage.getItem('user_rol');
-            
+
             // LÓGICA PARA EL ADMIN (D del CRUD: Delete)
             if (userRol === 'admin') {
                 const confirmDelete = confirm(`¿Quieres eliminar el marcador "${name}"?`);
@@ -104,27 +104,27 @@ const trackerNames = {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(deleteData)
                     })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Error al borrar');
-                        markerElement.remove();
-                        if (trackerCounts[category]) {
-                            trackerCounts[category].total--;
-                            if (markerElement.classList.contains('tachado')) {
-                                trackerCounts[category].marked--;
+                        .then(response => {
+                            if (!response.ok) throw new Error('Error al borrar');
+                            markerElement.remove();
+                            if (trackerCounts[category]) {
+                                trackerCounts[category].total--;
+                                if (markerElement.classList.contains('tachado')) {
+                                    trackerCounts[category].marked--;
+                                }
+                                updateTrackerUI(category);
                             }
-                            updateTrackerUI(category);
-                        }
-                    })
-                    .catch(error => alert('No se pudo borrar el marcador.'));
+                        })
+                        .catch(error => alert('No se pudo borrar el marcador.'));
                 }
-            } 
+            }
             // LÓGICA PARA USUARIOS NORMALES (U del CRUD: Update)
             else if (userRol === 'usuario') {
                 // Comprobamos si ya tiene la clase 'tachado' para hacer lo contrario (toggle)
                 const estaTachado = markerElement.classList.contains('tachado');
                 const nuevoEstado = !estaTachado;
 
-                const updateData = { 
+                const updateData = {
                     idMarcador: parseInt(id),
                     tachado: nuevoEstado,
                     username: localStorage.getItem('user_session')
@@ -135,28 +135,28 @@ const trackerNames = {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updateData)
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert('Error al guardar: ' + data.error);
-                        return;
-                    }
-                    // Si el servidor confirmó el guardado, actualizamos visualmente
-                    if (nuevoEstado) {
-                        markerElement.classList.add('tachado');
-                        if (trackerCounts[category]) {
-                            trackerCounts[category].marked++;
-                            updateTrackerUI(category);
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert('Error al guardar: ' + data.error);
+                            return;
                         }
-                    } else {
-                        markerElement.classList.remove('tachado');
-                        if (trackerCounts[category]) {
-                            trackerCounts[category].marked--;
-                            updateTrackerUI(category);
+                        // Si el servidor confirmó el guardado, actualizamos visualmente
+                        if (nuevoEstado) {
+                            markerElement.classList.add('tachado');
+                            if (trackerCounts[category]) {
+                                trackerCounts[category].marked++;
+                                updateTrackerUI(category);
+                            }
+                        } else {
+                            markerElement.classList.remove('tachado');
+                            if (trackerCounts[category]) {
+                                trackerCounts[category].marked--;
+                                updateTrackerUI(category);
+                            }
                         }
-                    }
-                })
-                .catch(error => alert('No se pudo conectar con el servidor.'));
+                    })
+                    .catch(error => alert('No se pudo conectar con el servidor.'));
             } else {
                 // Si es un invitado sin iniciar sesión
                 alert('Inicia sesión para poder marcar los puntos que has visitado.');
@@ -173,7 +173,7 @@ const trackerNames = {
 
     // Comprobamos que estamos en la página del mapa antes de ejecutar la lógica
     if (mapAsset && mapViewport && mapWrapper && markersLayer && markerModal && closeMarkerModalBtn && markerForm && markerNameInput && markerCategoryInput) {
-        
+
         // Variables matemáticas para el arrastre y el zoom del mapa
         let isDragging = false;
         let startX = 0; let startY = 0;
@@ -191,17 +191,17 @@ const trackerNames = {
             const viewportRect = mapViewport.getBoundingClientRect();
             const mapWidth = mapAsset.naturalWidth || mapWrapper.offsetWidth;
             const mapHeight = mapAsset.naturalHeight || mapWrapper.offsetHeight;
-            
+
             if (mapWidth > 0 && mapHeight > 0) {
                 // Calcular escala para encajar el mapa
                 const scaleX = viewportRect.width / mapWidth;
                 const scaleY = viewportRect.height / mapHeight;
                 minScale = Math.min(scaleX, scaleY, 1);
                 scale = minScale; // Inicia con el mapa encajado
-                
+
                 translateX = (viewportRect.width - (mapWidth * scale)) / 2;
                 translateY = (viewportRect.height - (mapHeight * scale)) / 2;
-                
+
                 updateMapTransform();
             }
         };
@@ -217,10 +217,10 @@ const trackerNames = {
         // ==========================================
         // Petición GET asíncrona mediante promesa (fetch) al Servlet de Java
         const activeUserSession = localStorage.getItem('user_session');
-        const leerUrl = activeUserSession 
-            ? `${API_BASE_URL}/LeerMarcadoresController?username=${encodeURIComponent(activeUserSession)}` 
+        const leerUrl = activeUserSession
+            ? `${API_BASE_URL}/LeerMarcadoresController?username=${encodeURIComponent(activeUserSession)}`
             : `${API_BASE_URL}/LeerMarcadoresController`;
-            
+
         fetch(leerUrl)
             .then(response => {
                 if (!response.ok) throw new Error('Error al cargar marcadores');
@@ -239,7 +239,7 @@ const trackerNames = {
         // ==========================================
         // 4. LÓGICA DE NAVEGACIÓN POR EL MAPA
         // ==========================================
-        
+
         // Evitamos que la imagen se arrastre nativamente (el bug del "fantasma" de la imagen)
         mapAsset.addEventListener('dragstart', (e) => e.preventDefault());
 
@@ -253,7 +253,7 @@ const trackerNames = {
             mapWrapper.style.cursor = 'grabbing';
         });
         mapViewport.addEventListener('touchstart', (e) => {
-            if (e.target.classList.contains('map-marker')) return; 
+            if (e.target.classList.contains('map-marker')) return;
             if (markerModal.contains(e.target)) return;
             if (e.touches.length === 1) {
                 isDragging = true;
@@ -320,7 +320,7 @@ const trackerNames = {
         // ==========================================
         // 5. CREATE (CRUD): AÑADIR MARCADOR
         // ==========================================
-        
+
         // Al hacer doble clic en el mapa, abrimos el menú para crear el marcador
         mapViewport.addEventListener('dblclick', (e) => {
             if (e.target.classList.contains('map-marker')) return;
@@ -376,18 +376,18 @@ const trackerNames = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newMarkerData) // Traducimos el objeto JS a cadena JSON plana
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Error en el servidor');
-                return response.json();
-            })
-            .then(data => {
-                // Si Java dice que OK, lo dibujamos gráficamente (Date.now() es un ID temporal)
-                renderMarker(Date.now(), markerName, markerCategory, tempMarkerX, tempMarkerY);
-                markerModal.classList.add('hidden'); // Ocultamos la ventana
-            })
-            .catch(error => {
-                alert('No se pudo guardar el marcador en la base de datos.');
-            });
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en el servidor');
+                    return response.json();
+                })
+                .then(data => {
+                    // Si Java dice que OK, lo dibujamos gráficamente (Date.now() es un ID temporal)
+                    renderMarker(Date.now(), markerName, markerCategory, tempMarkerX, tempMarkerY);
+                    markerModal.classList.add('hidden'); // Ocultamos la ventana
+                })
+                .catch(error => {
+                    alert('No se pudo guardar el marcador en la base de datos.');
+                });
         });
     }
 
@@ -411,21 +411,21 @@ const trackerNames = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(loginData)
             })
-            .then(response => {
-                // Si el status HTTP es distinto de 200, provocamos un error para ir al Catch
-                if (!response.ok) throw new Error('Credenciales incorrectas');
-                return response.json();
-            })
-            .then(data => {
-                // Guardamos en el navegador la sesión persistente (quién soy y qué rol tengo)
-                localStorage.setItem('user_session', data.username);
-                localStorage.setItem('user_rol', data.rol);
-                // Redirigimos al mapa principal
-                window.location.href = 'mapa.html';
-            })
-            .catch(error => {
-                alert('Usuario o contraseña incorrectos.');
-            });
+                .then(response => {
+                    // Si el status HTTP es distinto de 200, provocamos un error para ir al Catch
+                    if (!response.ok) throw new Error('Credenciales incorrectas');
+                    return response.json();
+                })
+                .then(data => {
+                    // Guardamos en el navegador la sesión persistente (quién soy y qué rol tengo)
+                    localStorage.setItem('user_session', data.username);
+                    localStorage.setItem('user_rol', data.rol);
+                    // Redirigimos al mapa principal
+                    window.location.href = 'mapa.html';
+                })
+                .catch(error => {
+                    alert('Usuario o contraseña incorrectos.');
+                });
         });
     }
 
@@ -446,22 +446,22 @@ const trackerNames = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registerData)
             })
-            .then(response => {
-                if (!response.ok) throw new Error('El usuario ya existe');
-                return response.json();
-            })
-            .then(data => {
-                // 1. AUTO-LOGIN: Cogemos el nombre que acaba de escribir y lo guardamos
-                const nombreNuevo = document.getElementById('reg-user').value;
-                localStorage.setItem('user_session', nombreNuevo);
-                localStorage.setItem('user_rol', 'usuario'); // Por defecto, es un usuario normal
-                
-                // 2. REDIRECCIÓN DIRECTA AL MAPA
-                alert('Registro completado. ¡Bienvenido a Hyrule!');
-                window.location.href = 'mapa.html'; 
-            })           .catch(error => {
-                alert('Error al registrar. Es posible que el nombre o email ya estén en uso.');
-            });
+                .then(response => {
+                    if (!response.ok) throw new Error('El usuario ya existe');
+                    return response.json();
+                })
+                .then(data => {
+                    // 1. AUTO-LOGIN: Cogemos el nombre que acaba de escribir y lo guardamos
+                    const nombreNuevo = document.getElementById('reg-user').value;
+                    localStorage.setItem('user_session', nombreNuevo);
+                    localStorage.setItem('user_rol', 'usuario'); // Por defecto, es un usuario normal
+
+                    // 2. REDIRECCIÓN DIRECTA AL MAPA
+                    alert('Registro completado. ¡Bienvenido a Hyrule!');
+                    window.location.href = 'mapa.html';
+                }).catch(error => {
+                    alert('Error al registrar. Es posible que el nombre o email ya estén en uso.');
+                });
         });
     }
 
@@ -502,9 +502,9 @@ const trackerNames = {
     const passwordModal = document.getElementById('password-modal');
     const closePasswordModalBtn = document.getElementById('close-password-modal');
     const passwordForm = document.getElementById('password-form');
-    
+
     if (authZone && profileZone && profileMenuTrigger && profileDropdown && btnChangePass && btnLogout && passwordModal && closePasswordModalBtn && passwordForm) {
-        
+
         // Comprobamos si el usuario ya inició sesión leyendo el LocalStorage
         const activeUser = localStorage.getItem('user_session');
         if (activeUser) {
@@ -549,9 +549,9 @@ const trackerNames = {
     // =========================================
     const formCambiarPass = document.getElementById('password-form'); // Actualizado a tu HTML
     if (formCambiarPass) {
-        formCambiarPass.addEventListener('submit', function(e) {
+        formCambiarPass.addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const nuevaPass = document.getElementById('new-password-input').value; // Actualizado a tu HTML
             const usernameActual = localStorage.getItem('user_session');
 
@@ -565,17 +565,17 @@ const trackerNames = {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'username=' + encodeURIComponent(usernameActual) + '&new_password=' + encodeURIComponent(nuevaPass)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('¡La contraseña ha sido modificada con éxito!');
-                    formCambiarPass.reset(); 
-                    document.getElementById('password-modal').classList.add('hidden'); 
-                } else {
-                    alert('Error al intentar actualizar la contraseña en la base de datos.');
-                }
-            })
-            .catch(err => console.error('Error:', err));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('¡La contraseña ha sido modificada con éxito!');
+                        formCambiarPass.reset();
+                        document.getElementById('password-modal').classList.add('hidden');
+                    } else {
+                        alert('Error al intentar actualizar la contraseña en la base de datos.');
+                    }
+                })
+                .catch(err => console.error('Error:', err));
         });
     }
 
@@ -586,7 +586,7 @@ const trackerNames = {
     if (btnDeleteAccount) {
         btnDeleteAccount.addEventListener('click', () => {
             const seguro = confirm('⚠️ ¿Estás seguro de que quieres borrar tu cuenta? Esta acción es definitiva.');
-            
+
             if (seguro) {
                 const usernameActual = localStorage.getItem('user_session');
 
@@ -595,21 +595,21 @@ const trackerNames = {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'username=' + encodeURIComponent(usernameActual)
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        localStorage.removeItem('user_session');
-                        localStorage.removeItem('user_rol');
-                        alert('Tu cuenta ha sido eliminada para siempre de la base de datos.');
-                        window.location.href = 'index.html';
-                    } else {
-                        alert('Error: No se pudo eliminar la cuenta del servidor.');
-                    }
-                })
-                .catch(err => console.error('Error:', err));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            localStorage.removeItem('user_session');
+                            localStorage.removeItem('user_rol');
+                            alert('Tu cuenta ha sido eliminada para siempre de la base de datos.');
+                            window.location.href = 'index.html';
+                        } else {
+                            alert('Error: No se pudo eliminar la cuenta del servidor.');
+                        }
+                    })
+                    .catch(err => console.error('Error:', err));
             }
         });
-    
+
     }
 });
-    
+
