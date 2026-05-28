@@ -54,11 +54,10 @@ public class LoginController extends HttpServlet {
 
     // Método auxiliar para no usar librerías externas
     private String extractJsonValue(String json, String key) {
-        String searchKey = "\"" + key + "\":\"";
-        int startIndex = json.indexOf(searchKey);
-        if (startIndex == -1) return "";
-        startIndex += searchKey.length();
-        int endIndex = json.indexOf("\"", startIndex);
-        return json.substring(startIndex, endIndex);
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"" + key + "\"\\s*:\\s*\"([^\"]*)\"").matcher(json);
+        if (m.find()) {
+            return m.group(1);
+        }
+        return "";
     }
 }

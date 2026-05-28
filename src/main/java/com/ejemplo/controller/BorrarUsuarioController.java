@@ -8,8 +8,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.ejemplo.model.BorrarUsuarioDAO;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 @WebServlet("/BorrarUsuario")
 public class BorrarUsuarioController extends HttpServlet {
@@ -18,22 +16,7 @@ public class BorrarUsuarioController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = request.getReader()) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-        }
-        
-        String username = null;
-        if (sb.length() > 0) {
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(sb.toString(), JsonObject.class);
-            if (jsonObject != null && jsonObject.has("username")) {
-                username = jsonObject.get("username").getAsString();
-            }
-        }
+        String username = request.getParameter("username");
 
         boolean exito = false;
         if (username != null) {

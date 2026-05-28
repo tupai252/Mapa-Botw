@@ -66,10 +66,13 @@ const trackerNames = {
     };
 
     // Función principal para DIBUJAR un marcador en la pantalla
-    const renderMarker = (id, name, category, x, y) => {
+    const renderMarker = (id, name, category, x, y, isTachado = false) => {
         // Creamos un div dinámicamente con JavaScript
         const markerElement = document.createElement('div');
         markerElement.className = `map-marker ${category}`;
+        if (isTachado) {
+            markerElement.classList.add('tachado');
+        }
         // Lo posicionamos de forma absoluta usando las coordenadas de la base de datos
         markerElement.style.left = `${x}px`;
         markerElement.style.top = `${y}px`;
@@ -80,6 +83,9 @@ const trackerNames = {
         // Sumamos 1 al contador visual
         if (trackerCounts[category]) {
             trackerCounts[category].total++;
+            if (isTachado) {
+                trackerCounts[category].marked++;
+            }
             updateTrackerUI(category);
         }
 
@@ -120,7 +126,8 @@ const trackerNames = {
 
                 const updateData = { 
                     idMarcador: parseInt(id),
-                    tachado: nuevoEstado 
+                    tachado: nuevoEstado,
+                    username: localStorage.getItem('user_session')
                 };
 
                 fetch(`${API_BASE_URL}/TacharMarcadorController`, {
@@ -205,7 +212,12 @@ const trackerNames = {
         // 3. READ (CRUD): CARGAR MARCADORES DE MYSQL
         // ==========================================
         // Petición GET asíncrona mediante promesa (fetch) al Servlet de Java
-        fetch(`${API_BASE_URL}/LeerMarcadoresController`)
+        const activeUserSession = localStorage.getItem('user_session');
+        const leerUrl = activeUserSession 
+            ? `${API_BASE_URL}/LeerMarcadoresController?username=${encodeURIComponent(activeUserSession)}` 
+            : `${API_BASE_URL}/LeerMarcadoresController`;
+            
+        fetch(leerUrl)
             .then(response => {
                 if (!response.ok) throw new Error('Error al cargar marcadores');
                 return response.json(); // Transformamos la respuesta de texto plano a formato JSON
@@ -214,7 +226,7 @@ const trackerNames = {
                 // Si la base de datos devuelve un array, lo recorremos y dibujamos punto por punto
                 if (Array.isArray(data)) {
                     data.forEach(m => {
-                        renderMarker(m.idMarcador, m.nombre, m.categoria, m.coordX, m.coordY);
+                        renderMarker(m.idMarcador, m.nombre, m.categoria, m.coordX, m.coordY, m.tachado);
                     });
                 }
             })

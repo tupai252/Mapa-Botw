@@ -31,14 +31,25 @@ public class TacharMarcadorController extends HttpServlet {
         String jsonFronend = sb.toString(); 
 
         try {
-            // 2. Extraemos el ID y el booleano
+            // 2. Extraemos el ID, el booleano y el username
             int idMarcador = Integer.parseInt(extractJsonValueNumber(jsonFronend, "idMarcador"));
-            // Como no tenemos Gson, buscamos si la cadena contiene "tachado":true
             boolean tachado = jsonFronend.contains("\"tachado\":true");
+            
+            String username = null;
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"username\"\\s*:\\s*\"([^\"]*)\"").matcher(jsonFronend);
+            if (m.find()) {
+                username = m.group(1);
+            }
+
+            if (username == null || username.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Usuario no autenticado\"}");
+                return;
+            }
 
             // 3. Llamamos al DAO aislado de actualización
             TacharMarcadorDAO tacharDAO = new TacharMarcadorDAO();
-            boolean exito = tacharDAO.alternarTachado(idMarcador, tachado);
+            boolean exito = tacharDAO.alternarTachado(idMarcador, username, tachado);
 
             // 4. Respondemos
             if (exito) {

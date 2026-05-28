@@ -15,8 +15,15 @@ CREATE TABLE marcadores (
     categoria VARCHAR(50) NOT NULL,
     coord_x FLOAT NOT NULL,
     coord_y FLOAT NOT NULL,
-    tachado BOOLEAN DEFAULT FALSE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE usuario_marcador (
+    username VARCHAR(50) NOT NULL,
+    id_marcador INT NOT NULL,
+    PRIMARY KEY (username, id_marcador),
+    FOREIGN KEY (username) REFERENCES usuarios(username) ON DELETE CASCADE,
+    FOREIGN KEY (id_marcador) REFERENCES marcadores(id_marcador) ON DELETE CASCADE
 );
 
 INSERT INTO usuarios (username, email, password_hash, rol) VALUES ('admin', 'admin@mapa.com', 'admin123', 'admin');

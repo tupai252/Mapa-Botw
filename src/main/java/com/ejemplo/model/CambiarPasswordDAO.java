@@ -1,8 +1,9 @@
-package model;
+package com.ejemplo.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.ejemplo.model.ConexionBD;
 
 public class CambiarPasswordDAO {
 

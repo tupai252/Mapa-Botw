@@ -22,9 +22,12 @@ public class LeerMarcadoresController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        // 1b. Extraemos el nombre de usuario de los parámetros (si existe)
+        String username = request.getParameter("username");
+
         // 2. Invocamos al modelo aislado para traernos los datos reales de MySQL
         LeerMarcadoresDAO leerDAO = new LeerMarcadoresDAO();
-        List<Marcador> marcadores = leerDAO.obtenerTodosLosMarcadores();
+        List<Marcador> marcadores = leerDAO.obtenerTodosLosMarcadores(username);
 
         // 3. PARSEO MANUAL A JSON (Regra estricta: Sin librerías externas)
         // Vamos a construir una cadena que simule la estructura de un array: [{}, {}, {}]
@@ -36,12 +39,13 @@ public class LeerMarcadoresController extends HttpServlet {
             
             // Inyectamos las variables de Java en un formato de texto estructurado como JSON
             jsonBuilder.append(String.format(
-                "{\"idMarcador\":%d,\"nombre\":\"%s\",\"categoria\":\"%s\",\"coordX\":%s,\"coordY\":%s}",
+                "{\"idMarcador\":%d,\"nombre\":\"%s\",\"categoria\":\"%s\",\"coordX\":%s,\"coordY\":%s,\"tachado\":%b}",
                 m.getIdMarcador(),
                 m.getNombre(),
                 m.getCategoria(),
                 Float.toString(m.getCoordX()),
-                Float.toString(m.getCoordY())
+                Float.toString(m.getCoordY()),
+                m.isTachado()
             ));
 
             // Si no es el último elemento de la lista, añadimos una coma para separar los objetos
