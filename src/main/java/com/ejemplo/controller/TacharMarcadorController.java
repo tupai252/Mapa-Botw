@@ -37,7 +37,7 @@ public class TacharMarcadorController extends HttpServlet {
                 idMarcador = Integer.parseInt(mId.group(1));
             }
 
-            boolean tachado = jsonFronend.matches(".*\"tachado\"\\s*:\\s*true.*");
+            boolean tachado = java.util.regex.Pattern.compile("\"tachado\"\\s*:\\s*true").matcher(jsonFronend).find();
             
             String username = null;
             java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"username\"\\s*:\\s*\"([^\"]*)\"").matcher(jsonFronend);
