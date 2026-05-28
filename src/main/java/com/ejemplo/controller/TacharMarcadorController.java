@@ -31,9 +31,13 @@ public class TacharMarcadorController extends HttpServlet {
         String jsonFronend = sb.toString(); 
 
         try {
-            // 2. Extraemos el ID, el booleano y el username
-            int idMarcador = Integer.parseInt(extractJsonValueNumber(jsonFronend, "idMarcador"));
-            boolean tachado = jsonFronend.contains("\"tachado\":true");
+            int idMarcador = 0;
+            java.util.regex.Matcher mId = java.util.regex.Pattern.compile("\"idMarcador\"\\s*:\\s*(\\d+)").matcher(jsonFronend);
+            if (mId.find()) {
+                idMarcador = Integer.parseInt(mId.group(1));
+            }
+
+            boolean tachado = jsonFronend.matches(".*\"tachado\"\\s*:\\s*true.*");
             
             String username = null;
             java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"username\"\\s*:\\s*\"([^\"]*)\"").matcher(jsonFronend);
@@ -41,9 +45,12 @@ public class TacharMarcadorController extends HttpServlet {
                 username = m.group(1);
             }
 
-            if (username == null || username.isEmpty()) {
+            System.out.println("DEBUG TACHAR: JSON recibido = " + jsonFronend);
+            System.out.println("DEBUG TACHAR: idMarcador=" + idMarcador + ", tachado=" + tachado + ", username=" + username);
+
+            if (username == null || username.isEmpty() || idMarcador == 0) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\": \"Usuario no autenticado\"}");
+                response.getWriter().write("{\"error\": \"Datos insuficientes o usuario no autenticado\"}");
                 return;
             }
 
