@@ -18,5 +18,5 @@ CREATE TABLE marcadores (
     tachado BOOLEAN DEFAULT FALSE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
+  
 INSERT INTO usuarios (username, email, password_hash, rol) VALUES ('admin', 'admin@mapa.com', 'admin123', 'admin');
