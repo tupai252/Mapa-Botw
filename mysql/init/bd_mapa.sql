@@ -1,4 +1,4 @@
-USE bd1;
+USE railway;
 
 DROP TABLE IF EXISTS usuario_marcador;
 DROP TABLE IF EXISTS marcadores;
