@@ -10,7 +10,7 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      MYSQLHOST: mysql
+      MYSQLHOST: mysql.railway.internal
       MYSQLPORT: 3306
       MYSQL_DATABASE: bd1
       MYSQLUSER: root
@@ -31,7 +31,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-proot" ]
       interval: 10s
       timeout: 5s
       retries: 10
