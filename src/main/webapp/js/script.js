@@ -58,73 +58,74 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Función para actualizar los contadores en el menú lateral de HTML
-    const updateTrackerUI = (category) => {
+    const actualizarContadorUI = (category) => {
         const titleElement = document.getElementById(`title-${category}`);
         if (titleElement && trackerCounts[category]) {
             titleElement.textContent = `${trackerNames[category]} ${trackerCounts[category].marked}/${trackerCounts[category].total}`;
         }
     };
 
-    // Función principal para DIBUJAR un marcador en la pantalla
-    const renderMarker = (id, name, category, x, y, isTachado = false) => {
+    // Función principal para DIBUJAR un marcador en la pantalla (recibe datos de LeerMarcadoresController)
+    const dibujarMarcador = (id, nombre, categoria, x, y, estaTachado = false) => {
         // Creamos un div dinámicamente con JavaScript
-        const markerElement = document.createElement('div');
-        markerElement.className = `map-marker ${category}`;
-        if (isTachado) {
-            markerElement.classList.add('tachado');
+        const elementoMarcador = document.createElement('div');
+        elementoMarcador.className = `map-marker ${categoria}`;
+        if (estaTachado) {
+            elementoMarcador.classList.add('tachado');
         }
         // Lo posicionamos de forma absoluta usando las coordenadas de la base de datos
-        markerElement.style.left = `${x}px`;
-        markerElement.style.top = `${y}px`;
-        markerElement.title = `${name} (${category})`;
-        markerElement.dataset.id = id;
-        markerElement.dataset.category = category;
+        elementoMarcador.style.left = `${x}px`;
+        elementoMarcador.style.top = `${y}px`;
+        elementoMarcador.title = `${nombre} (${categoria})`;
+        elementoMarcador.dataset.id = id;
+        elementoMarcador.dataset.category = categoria;
 
         // Sumamos 1 al contador visual
-        if (trackerCounts[category]) {
-            trackerCounts[category].total++;
-            if (isTachado) {
-                trackerCounts[category].marked++;
+        if (trackerCounts[categoria]) {
+            trackerCounts[categoria].total++;
+            if (estaTachado) {
+                trackerCounts[categoria].marked++;
             }
-            updateTrackerUI(category);
+            actualizarContadorUI(categoria);
         }
 
-        const handleMarkerAction = (event) => {
-            event.preventDefault(); // Evitamos el menú nativo
+        // Gestiona el clic en el marcador: llama a BorrarMarcadorController (admin) o TacharMarcadorController (usuario)
+        const accionAlClickarMarcador = (evento) => {
+            evento.preventDefault(); // Evitamos el menú nativo
 
-            const userRol = localStorage.getItem('user_rol');
+            const rolUsuario = localStorage.getItem('user_rol');
 
-            // LÓGICA PARA EL ADMIN (D del CRUD: Delete)
-            if (userRol === 'admin') {
-                const confirmDelete = confirm(`¿Quieres eliminar el marcador "${name}"?`);
-                if (confirmDelete) {
-                    const deleteData = { idMarcador: parseInt(id) };
+            // LÓGICA PARA EL ADMIN → envía datos a BorrarMarcadorController
+            if (rolUsuario === 'admin') {
+                const confirmarBorrado = confirm(`¿Quieres eliminar el marcador "${nombre}"?`);
+                if (confirmarBorrado) {
+                    const datosBorrar = { idMarcador: parseInt(id) };
                     fetch(`${API_BASE_URL}/BorrarMarcadorController`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(deleteData)
+                        body: JSON.stringify(datosBorrar)
                     })
-                        .then(response => {
-                            if (!response.ok) throw new Error('Error al borrar');
-                            markerElement.remove();
-                            if (trackerCounts[category]) {
-                                trackerCounts[category].total--;
-                                if (markerElement.classList.contains('tachado')) {
-                                    trackerCounts[category].marked--;
+                        .then(respuesta => {
+                            if (!respuesta.ok) throw new Error('Error al borrar');
+                            elementoMarcador.remove();
+                            if (trackerCounts[categoria]) {
+                                trackerCounts[categoria].total--;
+                                if (elementoMarcador.classList.contains('tachado')) {
+                                    trackerCounts[categoria].marked--;
                                 }
-                                updateTrackerUI(category);
+                                actualizarContadorUI(categoria);
                             }
                         })
                         .catch(error => alert('No se pudo borrar el marcador.'));
                 }
             }
-            // LÓGICA PARA USUARIOS NORMALES (U del CRUD: Update)
-            else if (userRol === 'usuario') {
+            // LÓGICA PARA USUARIOS NORMALES → envía datos a TacharMarcadorController
+            else if (rolUsuario === 'usuario') {
                 // Comprobamos si ya tiene la clase 'tachado' para hacer lo contrario (toggle)
-                const estaTachado = markerElement.classList.contains('tachado');
-                const nuevoEstado = !estaTachado;
+                const marcadorTachado = elementoMarcador.classList.contains('tachado');
+                const nuevoEstado = !marcadorTachado;
 
-                const updateData = {
+                const datosTachar = {
                     idMarcador: parseInt(id),
                     tachado: nuevoEstado
                 };
@@ -132,22 +133,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetch(`${API_BASE_URL}/TacharMarcadorController`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updateData)
+                    body: JSON.stringify(datosTachar)
                 })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Error al actualizar');
+                    .then(respuesta => {
+                        if (!respuesta.ok) throw new Error('Error al actualizar');
                         // Si Java da el OK, le ponemos o quitamos la clase gris visualmente
                         if (nuevoEstado) {
-                            markerElement.classList.add('tachado');
-                            if (trackerCounts[category]) {
-                                trackerCounts[category].marked++;
-                                updateTrackerUI(category);
+                            elementoMarcador.classList.add('tachado');
+                            if (trackerCounts[categoria]) {
+                                trackerCounts[categoria].marked++;
+                                actualizarContadorUI(categoria);
                             }
                         } else {
-                            markerElement.classList.remove('tachado');
-                            if (trackerCounts[category]) {
-                                trackerCounts[category].marked--;
-                                updateTrackerUI(category);
+                            elementoMarcador.classList.remove('tachado');
+                            if (trackerCounts[categoria]) {
+                                trackerCounts[categoria].marked--;
+                                actualizarContadorUI(categoria);
                             }
                         }
                     })
@@ -159,11 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Evento: Al hacer CLICK DERECHO (contextmenu) o CLICK/TOCAR normal
-        markerElement.addEventListener('contextmenu', handleMarkerAction);
-        markerElement.addEventListener('click', handleMarkerAction);
+        elementoMarcador.addEventListener('contextmenu', accionAlClickarMarcador);
+        elementoMarcador.addEventListener('click', accionAlClickarMarcador);
 
         // Añadimos el marcador recién creado a la capa del mapa
-        markersLayer.appendChild(markerElement);
+        markersLayer.appendChild(elementoMarcador);
     };
 
     // Comprobamos que estamos en la página del mapa antes de ejecutar la lógica
@@ -177,12 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let minScale = 0.1;
         let tempMarkerX = 0; let tempMarkerY = 0;
 
-        const updateMapTransform = () => {
+        const actualizarTransformacionMapa = () => {
             mapWrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
             mapWrapper.style.setProperty('--marker-scale', 1 / scale);
         };
 
-        const centerMap = () => {
+        const centrarMapa = () => {
             const viewportRect = mapViewport.getBoundingClientRect();
             const mapWidth = mapAsset.naturalWidth || mapWrapper.offsetWidth;
             const mapHeight = mapAsset.naturalHeight || mapWrapper.offsetHeight;
@@ -197,30 +198,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 translateX = (viewportRect.width - (mapWidth * scale)) / 2;
                 translateY = (viewportRect.height - (mapHeight * scale)) / 2;
 
-                updateMapTransform();
+                actualizarTransformacionMapa();
             }
         };
 
         if (mapAsset.complete) {
-            centerMap();
+            centrarMapa();
         } else {
-            mapAsset.addEventListener('load', centerMap);
+            mapAsset.addEventListener('load', centrarMapa);
         }
 
         // ==========================================
         // 3. READ (CRUD): CARGAR MARCADORES DE MYSQL
         // ==========================================
         // Petición GET asíncrona mediante promesa (fetch) al Servlet de Java
+        // Petición GET a LeerMarcadoresController para obtener todos los marcadores
         fetch(`${API_BASE_URL}/LeerMarcadoresController`)
-            .then(response => {
-                if (!response.ok) throw new Error('Error al cargar marcadores');
-                return response.json(); // Transformamos la respuesta de texto plano a formato JSON
+            .then(respuesta => {
+                if (!respuesta.ok) throw new Error('Error al cargar marcadores');
+                return respuesta.json(); // Transformamos la respuesta de texto plano a formato JSON
             })
-            .then(data => {
+            .then(datos => {
                 // Si la base de datos devuelve un array, lo recorremos y dibujamos punto por punto
-                if (Array.isArray(data)) {
-                    data.forEach(m => {
-                        renderMarker(m.idMarcador, m.nombre, m.categoria, m.coordX, m.coordY, m.tachado);
+                if (Array.isArray(datos)) {
+                    datos.forEach(m => {
+                        dibujarMarcador(m.idMarcador, m.nombre, m.categoria, m.coordX, m.coordY, m.tachado);
                     });
                 }
             })
@@ -268,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isDragging) return;
             translateX = e.clientX - startX;
             translateY = e.clientY - startY;
-            updateMapTransform();
+            actualizarTransformacionMapa();
         });
         mapViewport.addEventListener('touchmove', (e) => {
             if (!isDragging || e.touches.length !== 1) return;
@@ -276,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.cancelable) e.preventDefault();
             translateX = e.touches[0].clientX - startX;
             translateY = e.touches[0].clientY - startY;
-            updateMapTransform();
+            actualizarTransformacionMapa();
         }, { passive: false });
 
         // Al usar la rueda del ratón, calculamos el Zoom matemático hacia el puntero
@@ -287,23 +289,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const mouseX = e.clientX - viewportRect.left;
             const mouseY = e.clientY - viewportRect.top;
             const zoomSpeed = 0.1;
-            let nextScale;
+            let siguienteEscala;
 
             if (e.deltaY < 0) {
-                nextScale = Math.min(scale * (1 + zoomSpeed), 8); // Zoom in máximo (x8)
+                siguienteEscala = Math.min(scale * (1 + zoomSpeed), 8); // Zoom in máximo (x8)
             } else {
-                nextScale = Math.max(scale * (1 - zoomSpeed), minScale); // Zoom out mínimo (minScale)
+                siguienteEscala = Math.max(scale * (1 - zoomSpeed), minScale); // Zoom out mínimo (minScale)
             }
 
-            if (nextScale !== scale) {
+            if (siguienteEscala !== scale) {
                 const mapX = (mouseX - translateX) / scale;
                 const mapY = (mouseY - translateY) / scale;
 
-                scale = nextScale;
+                scale = siguienteEscala;
                 translateX = mouseX - mapX * scale;
                 translateY = mouseY - mapY * scale;
 
-                updateMapTransform();
+                actualizarTransformacionMapa();
             }
         }, { passive: false });
 
@@ -344,35 +346,35 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === markerModal) markerModal.classList.add('hidden');
         });
 
-        // Cuando el usuario le da al botón "AÑADIR AL MAPA" (Envío del formulario)
+        // Cuando el usuario le da al botón "AÑADIR AL MAPA" → envía datos a CrearMarcadorController
         markerForm.addEventListener('submit', (e) => {
             e.preventDefault(); // Evitamos que la página se recargue
 
-            const markerName = markerNameInput.value.trim();
-            const markerCategory = markerCategoryInput.value;
-            if (markerName === '' || markerCategory === '') return;
+            const nombreMarcador = markerNameInput.value.trim();
+            const categoriaMarcador = markerCategoryInput.value;
+            if (nombreMarcador === '' || categoriaMarcador === '') return;
 
-            // Creamos un objeto con los datos a enviar
-            const newMarkerData = {
-                nombre: markerName,
-                categoria: markerCategory,
+            // Creamos un objeto con los datos a enviar a CrearMarcadorController
+            const datosNuevoMarcador = {
+                nombre: nombreMarcador,
+                categoria: categoriaMarcador,
                 coordX: parseFloat(tempMarkerX.toFixed(2)),
                 coordY: parseFloat(tempMarkerY.toFixed(2))
             };
 
-            // Petición POST asíncrona mediante promesa (fetch) al Servlet de Java
+            // Petición POST a CrearMarcadorController
             fetch(`${API_BASE_URL}/CrearMarcadorController`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newMarkerData) // Traducimos el objeto JS a cadena JSON plana
+                body: JSON.stringify(datosNuevoMarcador)
             })
-                .then(response => {
-                    if (!response.ok) throw new Error('Error en el servidor');
-                    return response.json();
+                .then(respuesta => {
+                    if (!respuesta.ok) throw new Error('Error en el servidor');
+                    return respuesta.json();
                 })
-                .then(data => {
+                .then(datos => {
                     // Si Java dice que OK, lo dibujamos gráficamente (Date.now() es un ID temporal)
-                    renderMarker(Date.now(), markerName, markerCategory, tempMarkerX, tempMarkerY);
+                    dibujarMarcador(Date.now(), nombreMarcador, categoriaMarcador, tempMarkerX, tempMarkerY);
                     markerModal.classList.add('hidden'); // Ocultamos la ventana
                 })
                 .catch(error => {
@@ -386,12 +388,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
     // Lógica para el formulario de LOGIN
-    const loginForm = document.getElementById('login-form-element');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+    const formularioLogin = document.getElementById('login-form-element');
+    if (formularioLogin) {
+        formularioLogin.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const loginData = {
+            const datosLogin = {
                 username: document.getElementById('login-user').value,
                 password: document.getElementById('login-pass').value
             };
@@ -399,17 +401,17 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(`${API_BASE_URL}/LoginController`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(loginData)
+                body: JSON.stringify(datosLogin)
             })
-                .then(response => {
+                .then(respuesta => {
                     // Si el status HTTP es distinto de 200, provocamos un error para ir al Catch
-                    if (!response.ok) throw new Error('Credenciales incorrectas');
-                    return response.json();
+                    if (!respuesta.ok) throw new Error('Credenciales incorrectas');
+                    return respuesta.json();
                 })
-                .then(data => {
+                .then(datos => {
                     // Guardamos en el navegador la sesión persistente (quién soy y qué rol tengo)
-                    localStorage.setItem('user_session', data.username);
-                    localStorage.setItem('user_rol', data.rol);
+                    localStorage.setItem('user_session', datos.username);
+                    localStorage.setItem('user_rol', datos.rol);
                     // Redirigimos al mapa principal
                     window.location.href = 'mapa.html';
                 })
@@ -420,12 +422,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Lógica para el formulario de REGISTRO
-    const registerForm = document.getElementById('register-form-element');
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
+    const formularioRegistro = document.getElementById('register-form-element');
+    if (formularioRegistro) {
+        formularioRegistro.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const registerData = {
+            const datosRegistro = {
                 username: document.getElementById('reg-user').value,
                 email: document.getElementById('reg-email').value,
                 password: document.getElementById('reg-pass').value
@@ -434,13 +436,13 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(`${API_BASE_URL}/RegisterController`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(registerData)
+                body: JSON.stringify(datosRegistro)
             })
-                .then(response => {
-                    if (!response.ok) throw new Error('El usuario ya existe');
-                    return response.json();
+                .then(respuesta => {
+                    if (!respuesta.ok) throw new Error('El usuario ya existe');
+                    return respuesta.json();
                 })
-                .then(data => {
+                .then(datos => {
                     // 1. AUTO-LOGIN: Cogemos el nombre que acaba de escribir y lo guardamos
                     const nombreNuevo = document.getElementById('reg-user').value;
                     localStorage.setItem('user_session', nombreNuevo);
@@ -460,63 +462,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
     // Ventana de "Recuperar Contraseña"
-    const recoveryModal = document.getElementById('recovery-modal');
-    const openRecoveryBtn = document.getElementById('open-recovery-modal');
-    const closeRecoveryBtn = document.getElementById('close-recovery-modal');
-    const recoveryForm = document.getElementById('recovery-form');
+    const modalRecuperacion = document.getElementById('recovery-modal');
+    const btnAbrirRecuperacion = document.getElementById('open-recovery-modal');
+    const btnCerrarRecuperacion = document.getElementById('close-recovery-modal');
+    const formularioRecuperacion = document.getElementById('recovery-form');
 
-    if (recoveryModal && openRecoveryBtn && closeRecoveryBtn && recoveryForm) {
-        openRecoveryBtn.addEventListener('click', (e) => {
+    if (modalRecuperacion && btnAbrirRecuperacion && btnCerrarRecuperacion && formularioRecuperacion) {
+        btnAbrirRecuperacion.addEventListener('click', (e) => {
             e.preventDefault();
-            recoveryModal.classList.remove('hidden');
+            modalRecuperacion.classList.remove('hidden');
         });
-        closeRecoveryBtn.addEventListener('click', () => recoveryModal.classList.add('hidden'));
-        recoveryModal.addEventListener('click', (e) => {
-            if (e.target === recoveryModal) recoveryModal.classList.add('hidden');
+        btnCerrarRecuperacion.addEventListener('click', () => modalRecuperacion.classList.add('hidden'));
+        modalRecuperacion.addEventListener('click', (e) => {
+            if (e.target === modalRecuperacion) modalRecuperacion.classList.add('hidden');
         });
-        recoveryForm.addEventListener('submit', (e) => {
+        formularioRecuperacion.addEventListener('submit', (e) => {
             e.preventDefault();
             alert('Enlace de recuperación enviado.');
-            recoveryModal.classList.add('hidden');
-            recoveryForm.reset();
+            modalRecuperacion.classList.add('hidden');
+            formularioRecuperacion.reset();
         });
     }
 
     // Lógica del Menú de Usuario (Cerrar sesión y Cambiar contraseña)
-    const authZone = document.getElementById('auth-zone');
-    const profileZone = document.getElementById('profile-zone');
-    const profileMenuTrigger = document.getElementById('profile-menu-trigger');
-    const profileDropdown = document.getElementById('profile-dropdown');
-    const btnChangePass = document.getElementById('btn-change-pass');
-    const btnLogout = document.getElementById('btn-logout');
-    const passwordModal = document.getElementById('password-modal');
-    const closePasswordModalBtn = document.getElementById('close-password-modal');
-    const passwordForm = document.getElementById('password-form');
+    const zonaAutenticacion = document.getElementById('auth-zone');
+    const zonaPerfil = document.getElementById('profile-zone');
+    const disparadorMenuPerfil = document.getElementById('profile-menu-trigger');
+    const desplegablePerfil = document.getElementById('profile-dropdown');
+    const btnCambiarPass = document.getElementById('btn-change-pass');
+    const btnCerrarSesion = document.getElementById('btn-logout');
+    const modalPassword = document.getElementById('password-modal');
+    const btnCerrarModalPassword = document.getElementById('close-password-modal');
+    const formularioPassword = document.getElementById('password-form');
 
-    if (authZone && profileZone && profileMenuTrigger && profileDropdown && btnChangePass && btnLogout && passwordModal && closePasswordModalBtn && passwordForm) {
+    if (zonaAutenticacion && zonaPerfil && disparadorMenuPerfil && desplegablePerfil && btnCambiarPass && btnCerrarSesion && modalPassword && btnCerrarModalPassword && formularioPassword) {
 
         // Comprobamos si el usuario ya inició sesión leyendo el LocalStorage
-        const activeUser = localStorage.getItem('user_session');
-        if (activeUser) {
+        const usuarioActivo = localStorage.getItem('user_session');
+        if (usuarioActivo) {
             // Ocultamos los botones de inicio/registro y mostramos la foto de perfil con su nombre
-            authZone.classList.add('hidden');
-            profileZone.classList.remove('hidden');
-            profileZone.querySelector('.username-display').textContent = activeUser;
+            zonaAutenticacion.classList.add('hidden');
+            zonaPerfil.classList.remove('hidden');
+            zonaPerfil.querySelector('.username-display').textContent = usuarioActivo;
         }
 
         // Mostrar/Ocultar el submenú del perfil al pulsar
-        profileMenuTrigger.addEventListener('click', (e) => {
+        disparadorMenuPerfil.addEventListener('click', (e) => {
             e.stopPropagation(); // Evitamos que el clic cierre el menú automáticamente
-            profileDropdown.classList.toggle('hidden');
+            desplegablePerfil.classList.toggle('hidden');
         });
 
         // Click-Outside: Si pulsas fuera del menú, se esconde
         document.addEventListener('click', () => {
-            profileDropdown.classList.add('hidden');
+            desplegablePerfil.classList.add('hidden');
         });
 
         // Botón CERRAR SESIÓN
-        btnLogout.addEventListener('click', () => {
+        btnCerrarSesion.addEventListener('click', () => {
             if (confirm('¿Quieres cerrar sesión?')) {
                 // Borramos las variables del almacenamiento del navegador
                 localStorage.removeItem('user_session');
@@ -527,19 +529,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Botón CAMBIAR CONTRASEÑA (Abre Modal)
-        btnChangePass.addEventListener('click', () => passwordModal.classList.remove('hidden'));
-        closePasswordModalBtn.addEventListener('click', () => passwordModal.classList.add('hidden'));
-        passwordModal.addEventListener('click', (e) => {
-            if (e.target === passwordModal) passwordModal.classList.add('hidden');
+        btnCambiarPass.addEventListener('click', () => modalPassword.classList.remove('hidden'));
+        btnCerrarModalPassword.addEventListener('click', () => modalPassword.classList.add('hidden'));
+        modalPassword.addEventListener('click', (e) => {
+            if (e.target === modalPassword) modalPassword.classList.add('hidden');
         });
         // Eliminado evento duplicado que vaciaba el formulario antes del fetch
     }
     // =========================================
     // 1. CAMBIAR CONTRASEÑA 
     // =========================================
-    const formCambiarPass = document.getElementById('password-form'); // Actualizado a tu HTML
-    if (formCambiarPass) {
-        formCambiarPass.addEventListener('submit', function (e) {
+    const formularioCambiarPass = document.getElementById('password-form'); // Actualizado a tu HTML
+    if (formularioCambiarPass) {
+        formularioCambiarPass.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const nuevaPass = document.getElementById('new-password-input').value; // Actualizado a tu HTML
@@ -555,11 +557,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'username=' + encodeURIComponent(usernameActual) + '&new_password=' + encodeURIComponent(nuevaPass)
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(respuesta => respuesta.json())
+                .then(datos => {
+                    if (datos.success) {
                         alert('¡La contraseña ha sido modificada con éxito!');
-                        formCambiarPass.reset();
+                        formularioCambiarPass.reset();
                         document.getElementById('password-modal').classList.add('hidden');
                     } else {
                         alert('Error al intentar actualizar la contraseña en la base de datos.');
@@ -572,9 +574,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================
     // 2. BORRAR CUENTA 
     // =========================================
-    const btnDeleteAccount = document.getElementById('btn-delete-account');
-    if (btnDeleteAccount) {
-        btnDeleteAccount.addEventListener('click', () => {
+    const btnBorrarCuenta = document.getElementById('btn-delete-account');
+    if (btnBorrarCuenta) {
+        btnBorrarCuenta.addEventListener('click', () => {
             const seguro = confirm('⚠️ ¿Estás seguro de que quieres borrar tu cuenta? Esta acción es definitiva.');
 
             if (seguro) {
@@ -585,9 +587,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'username=' + encodeURIComponent(usernameActual)
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
+                    .then(respuesta => respuesta.json())
+                    .then(datos => {
+                        if (datos.success) {
                             localStorage.removeItem('user_session');
                             localStorage.removeItem('user_rol');
                             alert('Tu cuenta ha sido eliminada para siempre de la base de datos.');
